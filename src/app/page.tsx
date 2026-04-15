@@ -1,65 +1,191 @@
-import Image from "next/image";
+"use client";
+
+import { useMemo, useState } from "react";
+import ProductCard from "@/components/ProductCard";
+import { categories, products } from "@/data/products";
+
+const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low"];
 
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [sortBy, setSortBy] = useState("Featured");
+
+  const filteredProducts = useMemo(() => {
+    const result = products.filter((product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "All Categories" ||
+        product.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    if (sortBy === "Price: Low to High") {
+      return [...result].sort((a, b) => {
+        const priceA = Number(a.price.replace("$", ""));
+        const priceB = Number(b.price.replace("$", ""));
+        return priceA - priceB;
+      });
+    }
+
+    if (sortBy === "Price: High to Low") {
+      return [...result].sort((a, b) => {
+        const priceA = Number(a.price.replace("$", ""));
+        const priceB = Number(b.price.replace("$", ""));
+        return priceB - priceA;
+      });
+    }
+
+    return result;
+  }, [searchTerm, selectedCategory, sortBy]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <section className="border-b border-slate-200 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Product Explorer
+            </p>
+          </div>
+
+          <nav className="hidden gap-6 text-sm text-slate-600 md:flex">
+            <a href="#" className="transition hover:text-slate-900">
+              Products
+            </a>
+            <a href="#" className="transition hover:text-slate-900">
+              Categories
+            </a>
+            <a href="#" className="transition hover:text-slate-900">
+              Favorites
+            </a>
+          </nav>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-12 sm:py-16">
+        <div className="mb-10 max-w-3xl">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Modern shopping UI
+          </p>
+
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Discover products through a clean, polished interface
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">
+            This mock product explorer is focused on layout, spacing, and
+            presentation first — creating a strong frontend foundation before
+            adding API data, filtering, and interactivity.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-[1fr_220px_220px_auto]">
+            <div>
+              <label
+                htmlFor="search"
+                className="mb-2 block text-sm font-medium text-slate-700"
+              >
+                Search products
+              </label>
+              <input
+                id="search"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search for a product..."
+                className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="category"
+                className="mb-2 block text-sm font-medium text-slate-700"
+              >
+                Category
+              </label>
+              <select
+                id="category"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-500"
+              >
+                {categories.map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="sort"
+                className="mb-2 block text-sm font-medium text-slate-700"
+              >
+                Sort by
+              </label>
+              <select
+                id="sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-500"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All Categories");
+                  setSortBy("Featured");
+                }}
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Featured Products
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {filteredProducts.length} item
+              {filteredProducts.length !== 1 ? "s" : ""} found
+            </p>
+          </div>
+        </div>
+
+        {filteredProducts.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+            <h3 className="text-lg font-semibold text-slate-900">
+              No products found
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Try adjusting your search or selecting a different category.
+            </p>
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
